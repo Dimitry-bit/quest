@@ -18,7 +18,7 @@ class TaskDetails extends StatelessWidget {
     this.statusIcon,
     this.spacing = 8.0,
     this.padding = const EdgeInsets.all(16.0),
-    this.constraints = const BoxConstraints(maxWidth: 400.0),
+    this.constraints = const BoxConstraints(maxWidth: 420.0),
     this.chipShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(8.0)),
     ),

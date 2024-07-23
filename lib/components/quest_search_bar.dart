@@ -4,7 +4,7 @@ class QuestSearchBar extends StatelessWidget {
   final TextEditingController? controller;
   final bool autoFocus;
   final String? hintText;
-  final void Function(String?)? onSubmitted;
+  final void Function(String)? onSubmitted;
 
   const QuestSearchBar({
     super.key,

@@ -7,6 +7,7 @@ import 'package:quest/controllers/task_controller.dart';
 import 'package:quest/env/env.dart';
 import 'package:quest/loggers/loggers.dart';
 import 'package:quest/models/quest_settings.dart';
+import 'package:quest/pages/home_page.dart';
 
 void main() async {
   final gsheets = GSheets(Env.gsheetCredentials);
@@ -35,9 +36,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+        body: HomePage(),
       ),
     );
   }

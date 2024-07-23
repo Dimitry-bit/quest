@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTasksTimeline(BuildContext context, List<Task> tasks) {
-    const double contentPadding = 24.0;
+    const double contentPadding = 16.0;
     final theme = Theme.of(context);
 
     return Flexible(
@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.max,
           builder: TimelineTileBuilder.connected(
             itemCount: tasks.length,
-            itemExtent: 80.0,
+            itemExtent: 100.0,
             contentsAlign: ContentsAlign.alternating,
             contentsBuilder: (context, index) {
               final Task task = tasks[index];
@@ -172,6 +172,9 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                   style: const ButtonStyle(
+                    padding: WidgetStatePropertyAll(
+                      EdgeInsets.symmetric(horizontal: 16.0),
+                    ),
                     shape: WidgetStatePropertyAll(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8.0)),

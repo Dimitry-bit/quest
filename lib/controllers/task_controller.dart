@@ -74,6 +74,8 @@ class TaskController {
     }
   }
 
+  List<String> searchColumns() => List.from(_settings.searchColumn);
+
   /// Fetches and returns a map of task status colors, where keys are status names
   /// and values are corresponding [Color] objects.
   ///

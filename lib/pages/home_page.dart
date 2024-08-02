@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 16.0),
                 QuestSearchBar(
                   autoFocus: true,
-                  hintText: 'ID',
+                  hintText: _taskController.searchColumns().join(', '),
                   onSubmitted: (value) {
                     value = value.trim();
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:quest/models/task.dart';
 
@@ -162,12 +163,7 @@ class TaskDetails extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8.0),
-            Text(
-              content,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
+            MarkdownBody(data: content),
           ],
         ),
       ),

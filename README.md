@@ -102,7 +102,7 @@ The `Student Tasks` worksheet tracks student task status, notes and any other sp
 | `Task ID` | The task's key, which must also exist in the `Tasks` worksheet. | ✔️ |
 
 > [!TIP]
-> Any task specific column, except for the `Task ID`, will be displayed as a card on the Task Details page. For example, the `Notes` column.
+> Any task specific column, except for the `Task ID`, will be displayed as a card on the Task Details page. For example, the `Notes` column. Supports `Markdown`
 
 ![Student Tasks Worksheet](imgs/student_tasks_worksheet.png)
 

@@ -30,6 +30,11 @@ class GSheetTable {
     map = ValueMapper._(this);
   }
 
+  /// Constructs an empty [GSheetTable] instance.
+  GSheetTable.empty() : _rows = [] {
+    map = ValueMapper._(this);
+  }
+
   /// Returns the number of rows in the table.
   int get numRows => _rows.length;
 
@@ -363,6 +368,8 @@ class GSheetTable {
       length: count,
     );
   }
+
+  GSheetTable copy() => GSheetTable.fromRows(_rows);
 
   @override
   String toString() => 'TableMapper(table: $_rows)';

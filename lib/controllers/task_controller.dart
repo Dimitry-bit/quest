@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:quest/controllers/response.dart';
@@ -39,87 +40,38 @@ class TaskController {
   /// Returns a [Response] object containing a list of [Task] objects if tasks are found,
   /// otherwise returns a response with `null`.
   Future<Response<List<Task>>> getUserTasks(String identifier) async {
-    GSheetTable tasksTable;
-    GSheetTable studentsTable;
-
     try {
-      final students = await _fetchTable(_settings.studentTasksSheetTitle);
-      final tasks = await _fetchTable(_settings.tasksSheetTitle);
-
-      studentsTable = GSheetTable.fromRows(students);
-      tasksTable = GSheetTable.fromRows(tasks);
+      final studentsTable =
+          await _fetchGSheetTable(_settings.studentTasksSheetTitle);
+      final tasksTable = await _fetchGSheetTable(_settings.tasksSheetTitle);
 
       // Tasks header is not need.
       tasksTable.dropRow(0);
-    } catch (e) {
-      return Response.error(
-        "Failed to fetch '${_settings.tasksSheetTitle}' and "
-        "'${_settings.studentTasksSheetTitle}' tables, ${e.toString()}",
+
+      final int studentIndex = _findStudentTasksRow(
+        studentsTable,
+        _settings.searchColumn,
+        identifier,
       );
-    }
 
-    // Search for student's task row.
-    int studentIndex = _findStudentTasksRow(
-      studentsTable,
-      _settings.searchColumn,
-      identifier,
-    );
+      if (studentIndex != -1) {
+        final tasks = _isolateTasksFromStudent(
+          studentsTable,
+          tasksTable,
+          studentIndex,
+        );
 
-    if (studentIndex == -1) {
+        return Response(_parseTasks(tasks));
+      }
+
       return Response(null);
-    }
-
-    // Search for first task.
-    String? firstTask = tasksTable.firstOrNull?.firstOrNull;
-    if (firstTask == null) {
-      return Response([]);
-    }
-    final tasksIndex = studentsTable.map.indexOfColumn(firstTask);
-
-    // Isolate student tasks row.
-    studentsTable.dropRowWhere((_, index) => index != studentIndex);
-
-    studentsTable = studentsTable.reshapeColumn(
-      fromColumn: tasksIndex,
-      length: _settings.taskColumnDisplayNames.length - tasksTable.numColumns,
-    );
-
-    studentsTable = studentsTable.join(tasksTable);
-
-    List<Map<String, String>> tasks = studentsTable.map.getRows(
-      fromRow: 0,
-      alias: _settings.taskColumnDisplayNames,
-    );
-
-    List<Task> result = [];
-    for (var t in tasks) {
-      try {
-        final task = Task.fromJson(t);
-        result.add(task);
-      } catch (e) {
-        logger.w("Failed to construct task $t, ${e.toString()}");
+    } catch (e) {
+      if (kDebugMode) {
+        logger.e(e.toString());
       }
+
+      return Response.error(e.toString());
     }
-
-    return Response(result);
-  }
-
-  /// Finds the row index in [studentsTable] that matches [identifier] in any of the [searchColumns].
-  ///
-  /// Returns the index of the matching row if found, otherwise returns `-1`.
-  int _findStudentTasksRow(
-    GSheetTable studentsTable,
-    List<String> searchColumns,
-    String identifier,
-  ) {
-    for (var column in searchColumns) {
-      int index = studentsTable.map.findInColumn(column, identifier);
-      if (index != -1) {
-        return index;
-      }
-    }
-
-    return -1;
   }
 
   /// Fetches and returns a map of task status colors, where keys are status names
@@ -142,38 +94,6 @@ class TaskController {
     return _statusIcons!;
   }
 
-  /// Returns a list of rows fetched form worksheet with the
-  /// given [title] from [_spreadsheet].
-  ///
-  /// Optionally provides a callback [onError] if fetching fails.
-  ///
-  /// Throws:
-  ///   - [StateError] if the [title] worksheet is not found and no [onError] is provided.
-  ///   - [GSheetsException] if a failure occurred while fetching rows;
-  Future<List<List<String>>> _fetchTable(
-    String title, {
-    List<List<String>> Function()? onError,
-  }) async {
-    final sheet = _spreadsheet.worksheetByTitle(title);
-    if (sheet == null) {
-      if (onError != null) {
-        return onError();
-      }
-
-      throw StateError("Couldn't locate $title worksheet");
-    }
-
-    try {
-      return await sheet.values.allRows();
-    } catch (e) {
-      if (onError != null) {
-        return onError();
-      }
-
-      rethrow;
-    }
-  }
-
   /// Initializes [_statusMaps] by fetching [_settings.statusSheetTitle] worksheet.
   /// Defaults to empty map if worksheet does not exist.
   Future<void> _initializeStatusMaps() async {
@@ -190,6 +110,82 @@ class TaskController {
     }
 
     assert(_statusMaps != null);
+  }
+
+  /// Returns a list of rows fetched form worksheet with the
+  /// given [title] from [_spreadsheet].
+  ///
+  /// Optionally provides a callback [onError] if fetching fails.
+  ///
+  /// Throws:
+  ///   - [StateError] if the [title] worksheet is not found and no [onError] is provided.
+  ///   - [GSheetsException] if a failure occurred while fetching rows;
+  Future<GSheetTable> _fetchGSheetTable(
+    String title, {
+    GSheetTable Function()? onError,
+  }) async {
+    final sheet = _spreadsheet.worksheetByTitle(title);
+    if (sheet == null) {
+      if (onError != null) {
+        return onError();
+      }
+
+      throw StateError("Couldn't locate $title worksheet");
+    }
+
+    try {
+      return GSheetTable.fromRows(await sheet.values.allRows());
+    } catch (e) {
+      if (onError != null) {
+        return onError();
+      }
+
+      rethrow;
+    }
+  }
+
+  /// Finds the row index in [studentsTable] that matches [identifier] in any of the [searchColumns].
+  ///
+  /// Returns the index of the matching row if found, otherwise returns `-1`.
+  int _findStudentTasksRow(
+    GSheetTable studentsTable,
+    List<String> searchColumns,
+    String identifier,
+  ) {
+    for (var column in searchColumns) {
+      int index = studentsTable.map.findInColumn(column, identifier);
+      if (index != -1) {
+        return index;
+      }
+    }
+
+    return -1;
+  }
+
+  List<Map<String, String>> _isolateTasksFromStudent(
+    GSheetTable studentsTable,
+    GSheetTable tasksTable,
+    int studentIndex,
+  ) {
+    final firstTask = tasksTable.firstOrNull?.firstOrNull;
+    if (firstTask == null) {
+      return [];
+    }
+
+    GSheetTable isolatedTasks = studentsTable.copy();
+    final tasksIndex = isolatedTasks.map.indexOfColumn(firstTask);
+
+    isolatedTasks.dropRowWhere((_, index) => index != studentIndex);
+    isolatedTasks = isolatedTasks.reshapeColumn(
+      fromColumn: tasksIndex,
+      length: _settings.taskColumnDisplayNames.length - tasksTable.numColumns,
+    );
+    isolatedTasks = isolatedTasks.join(tasksTable);
+
+    return isolatedTasks.map.getRows(
+      fromRow: 0,
+      alias: _settings.taskColumnDisplayNames,
+    );
   }
 
   /// Parses a map of task status colors.
@@ -230,6 +226,22 @@ class TaskController {
         result[status] = IconData(codePoint, fontFamily: 'MaterialIcons');
       } else {
         logger.w('Invalid icon format $icon, skipping.');
+      }
+    }
+
+    return result;
+  }
+
+  /// Parses a list of JSON maps into a list of [Task] objects. If a map could
+  /// not be parsed into a [Task], it is skipped.
+  List<Task> _parseTasks(List<Map<String, String>> tasks) {
+    List<Task> result = [];
+
+    for (var t in tasks) {
+      try {
+        result.add(Task.fromJson(t));
+      } catch (e) {
+        logger.w("Failed to construct task $t, ${e.toString()}");
       }
     }
 

@@ -68,31 +68,33 @@ class _HomePageState extends State<HomePage> {
         children: [
           Container(),
           Flexible(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Logo(label: 'Quest', icon: Icons.track_changes),
-                const SizedBox(height: 16.0),
-                QuestSearchBar(
-                  autoFocus: true,
-                  hintText: _taskController.searchColumns().join(', '),
-                  onSubmitted: (value) {
-                    value = value.trim();
+            child: SingleChildScrollView(
+              primary: true,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Logo(label: 'Quest', icon: Icons.track_changes),
+                  const SizedBox(height: 16.0),
+                  QuestSearchBar(
+                    autoFocus: true,
+                    hintText: _taskController.searchColumns().join(', '),
+                    onSubmitted: (value) {
+                      value = value.trim();
 
-                    if (value.isEmpty) {
-                      fetchTasksFuture = null;
-                    } else {
-                      setState(() {
-                        fetchTasksFuture = _taskController.userTasks(value);
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(height: 8.0),
-                _buildBody(context),
-              ],
+                      if (value.isEmpty) {
+                        fetchTasksFuture = null;
+                      } else {
+                        setState(() {
+                          fetchTasksFuture = _taskController.userTasks(value);
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8.0),
+                  _buildBody(context),
+                ],
+              ),
             ),
           ),
           const Copyright(organization: 'Open Source Community'),
@@ -139,88 +141,83 @@ class _HomePageState extends State<HomePage> {
     const double contentPadding = 16.0;
     final theme = Theme.of(context);
 
-    return Flexible(
-      child: SingleChildScrollView(
-        primary: true,
-        child: FixedTimeline.tileBuilder(
-          mainAxisSize: MainAxisSize.max,
-          builder: TimelineTileBuilder.connected(
-            itemCount: tasks.length,
-            itemExtent: 100.0,
-            contentsAlign: ContentsAlign.alternating,
-            contentsBuilder: (context, index) {
-              final Task task = tasks[index];
+    return FixedTimeline.tileBuilder(
+      mainAxisSize: MainAxisSize.max,
+      builder: TimelineTileBuilder.connected(
+        itemCount: tasks.length,
+        itemExtent: 100.0,
+        contentsAlign: ContentsAlign.alternating,
+        contentsBuilder: (context, index) {
+          final Task task = tasks[index];
 
-              return Padding(
-                padding: const EdgeInsets.all(contentPadding),
-                child: FilledButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (_) => Dialog(
-                        alignment: Alignment.topRight,
-                        insetPadding: EdgeInsets.zero,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.zero),
-                        ),
-                        child: TaskDetails(
-                          task: task,
-                          statusColor: _taskColor(task.status),
-                          statusIcon: _taskIcon(task.status),
-                        ),
-                      ),
-                    );
-                  },
-                  style: const ButtonStyle(
-                    padding: WidgetStatePropertyAll(
-                      EdgeInsets.symmetric(horizontal: 16.0),
+          return Padding(
+            padding: const EdgeInsets.all(contentPadding),
+            child: FilledButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => Dialog(
+                    alignment: Alignment.topRight,
+                    insetPadding: EdgeInsets.zero,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.zero),
                     ),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                      ),
+                    child: TaskDetails(
+                      task: task,
+                      statusColor: _taskColor(task.status),
+                      statusIcon: _taskIcon(task.status),
                     ),
                   ),
-                  child: Text(task.title),
+                );
+              },
+              style: const ButtonStyle(
+                padding: WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 16.0),
                 ),
-              );
-            },
-            oppositeContentsBuilder: (context, index) {
-              final Task task = tasks[index];
-
-              return Padding(
-                padding: const EdgeInsets.all(contentPadding),
-                child: Text(
-                  task.status,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: theme.textTheme.labelLarge?.color?.withOpacity(0.4),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
                   ),
                 ),
-              );
-            },
-            connectorBuilder: (context, index, _) {
-              final Task task = tasks[index];
+              ),
+              child: Text(task.title),
+            ),
+          );
+        },
+        oppositeContentsBuilder: (context, index) {
+          final Task task = tasks[index];
 
-              Color color = _taskColor(task.status);
-              return SolidLineConnector(color: color);
-            },
-            indicatorBuilder: (context, index) {
-              final Task task = tasks[index];
+          return Padding(
+            padding: const EdgeInsets.all(contentPadding),
+            child: Text(
+              task.status,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: theme.textTheme.labelLarge?.color?.withOpacity(0.4),
+              ),
+            ),
+          );
+        },
+        connectorBuilder: (context, index, _) {
+          final Task task = tasks[index];
 
-              Color color = _taskColor(task.status);
-              return DotIndicator(
-                color: color,
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Icon(
-                    _taskIcon(task.status),
-                    size: 16.0,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
+          Color color = _taskColor(task.status);
+          return SolidLineConnector(color: color);
+        },
+        indicatorBuilder: (context, index) {
+          final Task task = tasks[index];
+
+          Color color = _taskColor(task.status);
+          return DotIndicator(
+            color: color,
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Icon(
+                _taskIcon(task.status),
+                size: 16.0,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

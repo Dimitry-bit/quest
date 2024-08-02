@@ -46,12 +46,12 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     _taskController = Provider.of<TaskController>(context, listen: false);
-    _taskController.getStatusColors().then((value) {
+    _taskController.statusColors().then((value) {
       if (value.isNotEmpty) {
         setState(() => _statusColors = value);
       }
     });
-    _taskController.getStatusIcons().then((value) {
+    _taskController.statusIcons().then((value) {
       if (value.isNotEmpty) {
         setState(() => _statusIcons = value);
       }
@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                       fetchTasksFuture = null;
                     } else {
                       setState(() {
-                        fetchTasksFuture = _taskController.getUserTasks(value);
+                        fetchTasksFuture = _taskController.userTasks(value);
                       });
                     }
                   },

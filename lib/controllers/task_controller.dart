@@ -17,12 +17,12 @@ class TaskController {
 
   /// Cached mapping of task status to corresponding color values.
   ///
-  /// Populated when [getStatusColors] is called.
+  /// Populated when [statusColors] is called.
   Map<String, Color>? _statusColors;
 
   /// Cached mapping of task status to corresponding icon data values.
   ///
-  /// Populated when [getStatusIcons] is called.
+  /// Populated when [statusIcons] is called.
   Map<String, IconData>? _statusIcons;
 
   /// Cached list of status mappings fetched from Google Sheets.
@@ -39,7 +39,7 @@ class TaskController {
   /// Retrieves tasks assigned to a user identified by [identifier].
   /// Returns a [Response] object containing a list of [Task] objects if tasks are found,
   /// otherwise returns a response with `null`.
-  Future<Response<List<Task>>> getUserTasks(String identifier) async {
+  Future<Response<List<Task>>> userTasks(String identifier) async {
     try {
       final studentsTable =
           await _fetchGSheetTable(_settings.studentTasksSheetTitle);
@@ -80,7 +80,7 @@ class TaskController {
   /// and values are corresponding [Color] objects.
   ///
   /// Returns an empty map if fetching fails or no valid data is found.
-  Future<Map<String, Color>> getStatusColors() async {
+  Future<Map<String, Color>> statusColors() async {
     await _initializeStatusMaps();
     _statusColors ??= _parseStatusColors(_statusMaps!);
     return _statusColors!;
@@ -90,7 +90,7 @@ class TaskController {
   /// and values are corresponding [IconData] objects.
   ///
   /// Returns an empty map if fetching fails or no valid data is found.
-  Future<Map<String, IconData>> getStatusIcons() async {
+  Future<Map<String, IconData>> statusIcons() async {
     await _initializeStatusMaps();
     _statusIcons = _parseStatusIcons(_statusMaps!);
     return _statusIcons!;

@@ -20,13 +20,13 @@ class GSheetTable {
 
   /// Constructs a [GSheetTable] instance from a list of rows.
   GSheetTable.fromRows(List<List<String>> rows)
-      : _rows = _convertToGrowable(rows) {
+      : _rows = _normalizeRowLengths(rows, '') {
     map = ValueMapper._(this);
   }
 
   /// Constructs a [GSheetTable] instance from a list of columns.
   GSheetTable.fromColumn(List<List<String>> columns)
-      : _rows = _transpose(columns) {
+      : _rows = _normalizeRowLengths(_transpose(columns), '') {
     map = ValueMapper._(this);
   }
 
@@ -539,16 +539,6 @@ class ValueMapper {
   }
 }
 
-List<List<T>> _convertToGrowable<T>(List<List<T>> fixedList) {
-  List<List<T>> growableList = [];
-
-  for (int i = 0; i < fixedList.length; i++) {
-    growableList.add(fixedList[i].toList());
-  }
-
-  return growableList;
-}
-
 List<List<T>> _transpose<T>(List<List<T>> values) {
   if (values.isEmpty) return [];
 
@@ -560,4 +550,26 @@ List<List<T>> _transpose<T>(List<List<T>> values) {
   });
 
   return transposed;
+}
+
+List<List<T>> _normalizeRowLengths<T>(List<List<T>> lists, T padValue) {
+  int maxLength = 0;
+  for (var list in lists) {
+    if (list.length > maxLength) {
+      maxLength = list.length;
+    }
+  }
+
+  List<List<T>> result = [];
+  for (var list in lists) {
+    List<T> paddedList = List<T>.from(list);
+
+    while (paddedList.length < maxLength) {
+      paddedList.add(padValue);
+    }
+
+    result.add(paddedList);
+  }
+
+  return result;
 }

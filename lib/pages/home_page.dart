@@ -60,45 +60,49 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(),
-          Flexible(
-            child: SingleChildScrollView(
-              primary: true,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Logo(label: 'Quest', icon: Icons.track_changes),
-                  const SizedBox(height: 16.0),
-                  QuestSearchBar(
-                    autoFocus: true,
-                    hintText: _taskController.searchColumns().join(', '),
-                    onSubmitted: (value) {
-                      value = value.trim();
+    return Title(
+      title: 'Quest',
+      color: Colors.orangeAccent,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(),
+            Flexible(
+              child: SingleChildScrollView(
+                primary: true,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Logo(label: 'Quest', icon: Icons.track_changes),
+                    const SizedBox(height: 16.0),
+                    QuestSearchBar(
+                      autoFocus: true,
+                      hintText: _taskController.searchColumns().join(', '),
+                      onSubmitted: (value) {
+                        value = value.trim();
 
-                      if (value.isEmpty) {
-                        fetchTasksFuture = null;
-                      } else {
-                        setState(() {
-                          fetchTasksFuture = _taskController.userTasks(value);
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 8.0),
-                  _buildBody(context),
-                ],
+                        if (value.isEmpty) {
+                          fetchTasksFuture = null;
+                        } else {
+                          setState(() {
+                            fetchTasksFuture = _taskController.userTasks(value);
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8.0),
+                    _buildBody(context),
+                  ],
+                ),
               ),
             ),
-          ),
-          const Copyright(organization: 'Open Source Community'),
-        ],
+            const Copyright(organization: 'Open Source Community'),
+          ],
+        ),
       ),
     );
   }
